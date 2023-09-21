@@ -1,9 +1,7 @@
-# Project
+# This is COMP 7409A Group 12's project:
+## Members: Li Chentao, Liu Yutong, Zheng Wenjing, Zhou Yuen, Xu Yunshi
 
-## This is COMP 7409A Group 12's project:
-### Members: Li Chentao, Liu Yutong, Zheng Wenjing, Zhou Yuen, Xu Yunshi
-
-#### For this repo we plan to have:
+#### For this repo we're planning to have:
 
 >Codebase & dataset
 
@@ -24,6 +22,6 @@
 > 5. Resolve code conflict from main (if there's any) and commit & push to your branch
 > 6. Open a pull reqeust from github page, describe your branch and assign a person to check your code
 > 7. After checking out pull request, the assignee should approve the pull request with review
-### *After pull request is merged, we know have a powerful main branch (Hopefully :\)
+### *After pull request is merged, we will have a more powerful main branch (Hopefully :\)
 
-## If you met any problem at any point, do not hesitate to ask in Wechat or open an ISSUE on github, __it is never a shame to ask questions__ ! 
+# If you met any problem at any point, do not hesitate to ask in Wechat or open an ISSUE on github, it is never a shame to ask questions! 
