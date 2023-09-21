@@ -26,4 +26,4 @@
 > 7. After checking out pull request, the assignee should approve the pull request with review
 ### *After pull request is merged, we know have a powerful main branch (Hopefully :\)
 
-## **If you met any problem at any point, do not hesitate to ask in Wechat or open a Issue on github**, __it is never a shame to ask questions__ ! 
+## If you met any problem at any point, do not hesitate to ask in Wechat or open an ISSUE on github, __it is never a shame to ask questions__ ! 
