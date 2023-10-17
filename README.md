@@ -4,7 +4,8 @@
 #### For this repo we're planning to have:
 
 >Codebase & dataset
-
+Since github cannot hold large csv files, everyone should download dataset on their own computer in following link:
+>https://www.kaggle.com/datasets/sgpjesus/bank-account-fraud-dataset-neurips-2022?select=Variant+II.csv
 
 >Report
 
