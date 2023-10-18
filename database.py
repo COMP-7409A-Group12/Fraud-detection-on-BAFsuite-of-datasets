@@ -59,8 +59,9 @@ def data_selection(data,sample_method:str=None, sample_portion:float=None):
     if sample_method == None:
         if sample_portion == None:
             return data
-        
-        class_non_fraud = data[data['fraud_bool'] == class_label][:int(len(data)*sample_portion)]
+        import math
+        class_non_fraud = data[data['fraud_bool'] == class_label]
+        class_non_fraud = class_non_fraud[:math.ceil(len(class_non_fraud)*sample_portion)]
         data = pd.concat([class_non_fraud, data[data['fraud_bool'] == reverse_label(class_label)]])
         print(f"No sample method applys to {sample_portion*100}% of {'non-fraud' if class_label == 0 else 'fraund'} cases")
 
@@ -82,4 +83,5 @@ def reverse_label(class_label:int)->int:
 
 
 if __name__ == "__main__":
-    print("Main?")
+    '''For testing purpose'''
+    print("This is testing result for database.py: ")
