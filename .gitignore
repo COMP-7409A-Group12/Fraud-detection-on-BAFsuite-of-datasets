@@ -1,1 +1,2 @@
 database/*.csv
+__pycache__
