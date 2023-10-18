@@ -53,14 +53,19 @@ def data_selection(data,sample_method:str=None, sample_portion:float=None):
     sample_method: how do you want to sample from non-fraund records
     sample_portion: how much we need sample from non-fraud records
     '''
-    class_label = 0 # sample non-fraund cases
+    class_label = 0 # sample non-fraund cases by default
     seed = None # the seed you want to replicate result, None by default
 
-    if sample_method == None and sample_portion==None:
-        print("No sample method applys to non-fraud cases.")
+    if sample_method == None:
+        if sample_portion == None:
+            return data
+        
+        class_non_fraud = data[data['fraud_bool'] == class_label][:int(len(data)*sample_portion)]
+        data = pd.concat([class_non_fraud, data[data['fraud_bool'] == reverse_label(class_label)]])
+        print(f"No sample method applys to {sample_portion*100}% of {'non-fraud' if class_label == 0 else 'fraund'} cases")
 
     elif sample_method=='random':
-        print(f"Randomly sample {sample_portion*100}% {'non-fraud' if class_label == 0 else 'fraund'} cases")
+        print(f"Randomly sample {sample_portion*100}% of {'non-fraud' if class_label == 0 else 'fraund'} cases")
         # data lanudry e.g. how do you want to sample data?
         class_non_fraud = data[data['fraud_bool'] == class_label]
         sample_non_fraud = class_non_fraud.sample(frac=sample_portion,random_state=seed)
