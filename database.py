@@ -81,6 +81,25 @@ def reverse_label(class_label:int)->int:
         return 0
     return 1
 
+def one_hot(data,train, ohe):
+    '''
+    One hot encoding for columns that are categorical
+    Input:
+    data: X train or X test data with columns you want to encoder
+    train: A boolean value, true if passing train data false otherwise
+    ohe: One hot encoder to encode your dataset
+
+    Output:
+    a Dataframe includes both encoded columns and other numerical columns
+    '''
+    X_categorical = data.loc[:,data.dtypes == 'object']
+    if train:
+        X_categorical_encoded = pd.DataFrame(ohe.fit_transform(X_categorical))
+    else:
+        X_categorical_encoded = pd.DataFrame(ohe.transform(X_categorical))
+    X_categorical_encoded.index = X_categorical.index
+    X_categorical_encoded.columns = X_categorical_encoded.columns.astype(str)
+    return pd.concat([X_categorical_encoded,data.drop(columns=X_categorical.columns.tolist())],axis=1)
 
 if __name__ == "__main__":
     '''For testing purpose'''
