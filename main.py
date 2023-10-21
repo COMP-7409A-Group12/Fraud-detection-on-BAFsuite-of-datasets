@@ -17,7 +17,8 @@ def main():
     TODO: implement models namely, XXX.py and we import them on top
     TODO: After we get results from each model(s) we need to draw them and display results, if any.
     '''
-    svm = SVM.svm_fit()
+    svm_FPR,svm_error = SVM.svm_fit()
+    print(svm_FPR,svm_error)
 
     if visualize:
         db.display_data(sample_method,sample_portion,name, detail)

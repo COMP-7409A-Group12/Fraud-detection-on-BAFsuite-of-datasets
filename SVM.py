@@ -1,27 +1,33 @@
 from sklearn import svm
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
+import plot
 
 import database as db
 
-
 # train SVM  //rbf>linear>poly>sigmoid
-def SVM(X_train, y_train, X_test, y_test):
-    svm = SVC(kernel='rbf')
+def SVM_train(X_train, y_train, X_test, y_test,kernel:str):
+    svm = SVC(kernel=kernel)
     svm.fit(X_train, y_train)
+
+
+
     y_pred = svm.predict(X_test)
-    return accuracy_score(y_test, y_pred), precision_score(y_test, y_pred), recall_score(y_test, y_pred), f1_score(
-        y_test, y_pred)
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+    FPR = fp / (tn + fp)
+    error_rate = (fp+fn) / (tn + fp + fn + tp)
+    # return accuracy_score(y_test, y_pred), precision_score(y_test, y_pred), recall_score(y_test, y_pred), f1_score(
+    #     y_test, y_pred)
+    return FPR,error_rate
 
 
 #
 def svm_fit():
     X = db.data_lanudry(sample_portion=0.1)
-    ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
 
     X_train, X_test = train_test_split(X, test_size=0.3, train_size=0.7)
 
@@ -35,16 +41,33 @@ def svm_fit():
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    accuracy, precision, recall, f1_score = SVM(X_train, y_train, X_test, y_test)
-    print(
-        "accuracy:" + str(accuracy) + "\nprecision:" + str(precision) + "\nrecall:" + str(recall) + "\nf1_score:" + str(
-            f1_score))
+    kernels = ['linear', 'rbf', 'poly', 'sigmoid']
+    FPR ,error= [],[]
+
+
+    for kernel in kernels:
+        fpr,svm_error = SVM_train(X_train, y_train, X_test, y_test, kernel=kernel)
+        print(fpr,svm_error)
+        FPR.append(fpr)
+        error.append(svm_error)
+    kernel_numlist = [i + 1 for i in range(len(FPR))]
+    plot.draw(kernel_numlist, FPR, 'SVM', 'kernel', 'FPR')
+    plot.draw(kernel_numlist, error, 'SVM', 'kernel', 'FPR')
+
+    return FPR,error
+    #accuracy, precision, recall, f1_score = SVM_train(X_train, y_train, X_test, y_test)
+
+    # print(
+    #     "accuracy:" + str(accuracy) + "\nprecision:" + str(precision) + "\nrecall:" + str(recall) + "\nf1_score:" + str(
+    #         f1_score))
+
+
+
 
 
 if __name__ == "__main__":
     '''For testing purpose only'''
     X = db.data_lanudry(sample_portion=0.1)
-    ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
 
     X_train, X_test = train_test_split(X, test_size=0.3, train_size=0.7)
 
@@ -57,30 +80,8 @@ if __name__ == "__main__":
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
-    print(SVM(X_train, y_train, X_test, y_test))
+    print(SVM_train(X_train, y_train, X_test, y_test,'linear'))
 
-# FPR
 
-# # 加载数据集
-# with open(f'./database/base.csv') as f:
-#     data = f.readlines() # 将数据集加载到data变量中
-#     data = np.array([data])
-#     # 划分特征和标签
-#     X = data[:, 1:]  # 特征
-#     y = data[:, 0]  # 标签
-#
-#     # 划分训练集和测试集
-#     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-#
-#     # 创建SVM分类器对象
-#     clf = svm.SVC(kernel='linear')
-#
-#     # 在训练集上训练SVM分类器
-#     clf.fit(X_train, y_train)
-#
-#     # 在测试集上进行预测
-#     y_pred = clf.predict(X_test)
-#
-#     # 计算准确率
-#     accuracy = accuracy_score(y_test, y_pred)
-#     print("准确率：", accuracy)
+
+

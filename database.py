@@ -1,6 +1,7 @@
 import pandas as pd
 
-def display_data(sample_method:str=None, sample_portion:str=None,name:str='base.csv', detail= 'short'):
+
+def display_data(sample_method: str = None, sample_portion: str = None, name: str = 'base.csv', detail='short'):
     '''
     Display data from csv
     Display each type and first 5 rows per attribute
@@ -11,16 +12,17 @@ def display_data(sample_method:str=None, sample_portion:str=None,name:str='base.
     sample_portion: how much we need sample from non-fraud records
     detail: Print data with 'long': All detail for each column in csv or 'short': a brief summary of data.
     '''
-    data = data_lanudry( sample_method,sample_portion, name)
+    data = data_lanudry(sample_method, sample_portion, name)
 
     if detail == 'short':
         print(data)
-    elif detail =='long':
+    elif detail == 'long':
         for col in data.columns:
             print(f'Column: {col}')
             print(data[col].head(5))
 
-def data_lanudry(sample_method:str=None, sample_portion:float=None,name:str='base.csv'):
+
+def data_lanudry(sample_method: str = None, sample_portion: float = None, name: str = 'base.csv'):
     '''
     Input:
     name: the name of csv you want to load
@@ -43,7 +45,8 @@ def data_lanudry(sample_method:str=None, sample_portion:float=None,name:str='bas
     # return DF object
     return data
 
-def data_selection(data,sample_method:str=None, sample_portion:float=None):
+
+def data_selection(data, sample_method: str = None, sample_portion: float = None):
     '''
     A method to select data, especially to select from a non-fraud class
     Since we've seen non-fraud records are way more than fraud records
@@ -53,27 +56,29 @@ def data_selection(data,sample_method:str=None, sample_portion:float=None):
     sample_method: how do you want to sample from non-fraund records
     sample_portion: how much we need sample from non-fraud records
     '''
-    class_label = 0 # sample non-fraund cases by default
-    seed = None # the seed you want to replicate result, None by default
+    class_label = 0  # sample non-fraund cases by default
+    seed = None  # the seed you want to replicate result, None by default
 
     if sample_method == None:
         if sample_portion == None:
             return data
         import math
         class_non_fraud = data[data['fraud_bool'] == class_label]
-        class_non_fraud = class_non_fraud[:math.ceil(len(class_non_fraud)*sample_portion)]
+        class_non_fraud = class_non_fraud[:math.ceil(len(class_non_fraud) * sample_portion)]
         data = pd.concat([class_non_fraud, data[data['fraud_bool'] == reverse_label(class_label)]])
-        print(f"No sample method applys to {sample_portion*100}% of {'non-fraud' if class_label == 0 else 'fraund'} cases")
+        print(
+            f"No sample method applys to {sample_portion * 100}% of {'non-fraud' if class_label == 0 else 'fraund'} cases")
 
-    elif sample_method=='random':
-        print(f"Randomly sample {sample_portion*100}% of {'non-fraud' if class_label == 0 else 'fraund'} cases")
+    elif sample_method == 'random':
+        print(f"Randomly sample {sample_portion * 100}% of {'non-fraud' if class_label == 0 else 'fraund'} cases")
         # data lanudry e.g. how do you want to sample data?
         class_non_fraud = data[data['fraud_bool'] == class_label]
-        sample_non_fraud = class_non_fraud.sample(frac=sample_portion,random_state=seed)
+        sample_non_fraud = class_non_fraud.sample(frac=sample_portion, random_state=seed)
         data = pd.concat([sample_non_fraud, data[data['fraud_bool'] == reverse_label(class_label)]])
     return data
 
-def reverse_label(class_label:int)->int:
+
+def reverse_label(class_label: int) -> int:
     '''
     Return opposite class label
     '''
@@ -81,7 +86,8 @@ def reverse_label(class_label:int)->int:
         return 0
     return 1
 
-def one_hot(data,train, ohe):
+
+def one_hot(data, train, ohe):
     '''
     One hot encoding for columns that are categorical
     Input:
@@ -92,14 +98,15 @@ def one_hot(data,train, ohe):
     Output:
     a Dataframe includes both encoded columns and other numerical columns
     '''
-    X_categorical = data.loc[:,data.dtypes == 'object']
+    X_categorical = data.loc[:, data.dtypes == 'object']
     if train:
         X_categorical_encoded = pd.DataFrame(ohe.fit_transform(X_categorical))
     else:
         X_categorical_encoded = pd.DataFrame(ohe.transform(X_categorical))
     X_categorical_encoded.index = X_categorical.index
     X_categorical_encoded.columns = X_categorical_encoded.columns.astype(str)
-    return pd.concat([X_categorical_encoded,data.drop(columns=X_categorical.columns.tolist())],axis=1)
+    return pd.concat([X_categorical_encoded, data.drop(columns=X_categorical.columns.tolist())], axis=1)
+
 
 if __name__ == "__main__":
     '''For testing purpose'''
