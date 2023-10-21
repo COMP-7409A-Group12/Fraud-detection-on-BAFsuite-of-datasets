@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
 
 
 def display_data(sample_method: str = None, sample_portion: str = None, name: str = 'base.csv', detail='short'):
@@ -86,6 +87,16 @@ def reverse_label(class_label: int) -> int:
         return 0
     return 1
 
+def one_hot(data,train, ohe):
+    
+    X_categorical = data.loc[:,data.dtypes == 'object']
+    if train:
+        X_categorical_encoded = pd.DataFrame(ohe.fit_transform(X_categorical))
+    else:
+        X_categorical_encoded = pd.DataFrame(ohe.transform(X_categorical))
+    X_categorical_encoded.index = X_categorical.index
+    X_categorical_encoded.columns = X_categorical_encoded.columns.astype(str)
+    return pd.concat([X_categorical_encoded,data.drop(columns=X_categorical.columns.tolist())],axis=1)
 
 def one_hot(data, train, ohe):
     '''
