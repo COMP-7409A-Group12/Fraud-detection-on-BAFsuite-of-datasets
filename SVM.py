@@ -1,3 +1,4 @@
+import pandas
 from sklearn import svm
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
@@ -26,8 +27,8 @@ def SVM_train(X_train, y_train, X_test, y_test,kernel:str):
 
 
 #
-def svm_fit():
-    X = db.data_lanudry(sample_portion=0.1)
+def svm_fit(X:pandas.DataFrame):
+
 
     X_train, X_test = train_test_split(X, test_size=0.3, train_size=0.7)
 
@@ -52,7 +53,7 @@ def svm_fit():
         error.append(svm_error)
     kernel_numlist = [i + 1 for i in range(len(FPR))]
     plot.draw(kernel_numlist, FPR, 'SVM', 'kernel', 'FPR')
-    plot.draw(kernel_numlist, error, 'SVM', 'kernel', 'FPR')
+    plot.draw(kernel_numlist, error, 'SVM', 'kernel', 'error')
 
     return FPR,error
     #accuracy, precision, recall, f1_score = SVM_train(X_train, y_train, X_test, y_test)
