@@ -1,2 +1,3 @@
 database/*.csv
 __pycache__
+.idea

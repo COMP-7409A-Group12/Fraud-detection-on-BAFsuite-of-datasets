@@ -1,6 +1,7 @@
 # import logistic_regression
 # import knn
 import database as db
+import SVM
 
 visualize = False # If you want to see all attribute in terminal, False by default
 sample_method = None # Choose between None and 'random'
@@ -16,7 +17,7 @@ def main():
     TODO: implement models namely, XXX.py and we import them on top
     TODO: After we get results from each model(s) we need to draw them and display results, if any.
     '''
-
+    svm = SVM.svm_fit()
 
     if visualize:
         db.display_data(sample_method,sample_portion,name, detail)
