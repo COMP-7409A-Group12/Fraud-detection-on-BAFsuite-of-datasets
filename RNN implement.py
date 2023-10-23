@@ -35,7 +35,7 @@ def RNN_train(X_train, y_train, X_test, y_test):
 
     model.compile(loss='binary_crossentropy', optimizer='adam',metrics= [f1_score])
 
-    model.fit(X_train.reshape(X_train.shape[0], X_train.shape[1], 1), y_train, epochs=1, batch_size=32)
+    model.fit(X_train.reshape(X_train.shape[0], X_train.shape[1], 1), y_train, epochs=10, batch_size=32)
 
     y_pred = model.predict(X_test.reshape(X_test.shape[0], X_test.shape[1], 1))
     y_pred_binary = np.round(y_pred)
