@@ -34,7 +34,7 @@ def svm_fit(X:pandas.DataFrame):
 
     y_train = X_train['fraud_bool']
     y_test = X_test['fraud_bool']
-    ohe = OneHotEncoder(sparse_output=False, handle_unknown='i gnore')
+    ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
     X_train = db.one_hot(X_train.drop(['fraud_bool'], axis=1), True, ohe)
     X_test = db.one_hot(X_test.drop(['fraud_bool'], axis=1), False, ohe)
 
