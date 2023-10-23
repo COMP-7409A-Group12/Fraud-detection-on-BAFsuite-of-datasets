@@ -1,22 +1,22 @@
 import pandas
 from sklearn import svm
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.svm import SVC
 import plot
+from sklearn.utils import shuffle
 
 import database as db
 
 # train SVM  //rbf>linear>poly>sigmoid
 def SVM_train(X_train, y_train, X_test, y_test,kernel:str):
     svm = SVC(kernel=kernel)
+    cross_validation(svm, X_train, y_train, 10, 'f1')
+
     svm.fit(X_train, y_train)
-
-
-
     y_pred = svm.predict(X_test)
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     FPR = fp / (tn + fp)
@@ -29,12 +29,12 @@ def SVM_train(X_train, y_train, X_test, y_test,kernel:str):
 #
 def svm_fit(X:pandas.DataFrame):
 
-
+    #X_train, y_train = shuffle(X_train, y_train)
     X_train, X_test = train_test_split(X, test_size=0.3, train_size=0.7)
 
     y_train = X_train['fraud_bool']
     y_test = X_test['fraud_bool']
-    ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+    ohe = OneHotEncoder(sparse_output=False, handle_unknown='i gnore')
     X_train = db.one_hot(X_train.drop(['fraud_bool'], axis=1), True, ohe)
     X_test = db.one_hot(X_test.drop(['fraud_bool'], axis=1), False, ohe)
 
@@ -62,6 +62,9 @@ def svm_fit(X:pandas.DataFrame):
     #     "accuracy:" + str(accuracy) + "\nprecision:" + str(precision) + "\nrecall:" + str(recall) + "\nf1_score:" + str(
     #         f1_score))
 
+def cross_validation(model, x, y,cv,score_type:str):
+    scores = cross_val_score(model, x, y, cv=cv, scoring=score_type)
+    print(scores)
 
 
 

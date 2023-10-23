@@ -7,13 +7,18 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 import pandas as pd
 import plot
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
+
 
 def logistic_regression_train(X_train, y_train, X_test, y_test,solver):
-    print(solver)
-    lr = LogisticRegression(solver=solver,max_iter=999)
-    lr.fit(X_train,y_train)
 
+    lr = LogisticRegression(solver=solver,max_iter=999)
+    #########################################################
+    cross_validation(lr, X_train, y_train,10,'f1')
+    #########################################################
+
+
+    lr.fit(X_train,y_train)
     y_pred = lr.predict(X_test)
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     FPR = fp / (tn + fp)
@@ -50,11 +55,16 @@ def lr_fit(X:pandas.DataFrame):
 
     return FPR, error
 
+#########################################################
+def cross_validation(model, x, y,cv,score_type:str):
+    scores = cross_val_score(model, x, y, cv=cv, scoring=score_type)
+    print(scores)
+#########################################################
 if __name__ == "__main__":
     '''For testing purpose only'''
     X = db.data_lanudry(sample_portion=0.1)
     ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
-    
+
     X_train, X_test = train_test_split(X,test_size=0.3, train_size=0.7)
 
     y_train = X_train['fraud_bool']

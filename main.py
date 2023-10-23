@@ -4,7 +4,7 @@ import database as db
 import SVM
 import logistic as lr
 
-visualize = False # If you want to see all attribute in terminal, False by default
+visualize = True # If you want to see all attribute in terminal, False by default
 sample_method = None # Choose between None and 'random'
 sample_portion = 0.1 # Expecting a float number for example: 0.3
 name = 'base.csv'
@@ -20,13 +20,15 @@ def main():
     '''
     X = db.data_lanudry(sample_portion=sample_portion)
 
-    lr_FPR, lr_error = lr.lr_fit(X)
-    print(lr_FPR, lr_error)
-    # svm_FPR,svm_error = SVM.svm_fit(X)
-    # print(svm_FPR,svm_error)
+    # lr_FPR, lr_error = lr.lr_fit(X)
+    # print(lr_FPR, lr_error)
+    svm_FPR,svm_error = SVM.svm_fit(X)
+    print(svm_FPR,svm_error)
 
     if visualize:
         db.display_data(sample_method,sample_portion,name, detail)
+
+
 
 
 main()
