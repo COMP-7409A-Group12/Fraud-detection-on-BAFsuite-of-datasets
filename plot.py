@@ -55,4 +55,4 @@ def draw(x: list, y: list,model_name:str,parameter:str,evaluation_method:str) ->
 if __name__ == "__main__":
     x=[1,2,3,4,5]
     y=[9,8,7,6,5]
-    draw(x,y,'SVM','solver','accuracy')
+    draw(x,y,'random_forest','criterion','accuracy')

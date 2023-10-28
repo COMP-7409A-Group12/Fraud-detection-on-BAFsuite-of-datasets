@@ -3,6 +3,7 @@
 import database as db
 import SVM
 import logistic as lr
+import random_forest
 
 visualize = True # If you want to see all attribute in terminal, False by default
 sample_method = None # Choose between None and 'random'
@@ -22,8 +23,10 @@ def main():
 
     # lr_FPR, lr_error = lr.lr_fit(X)
     # print(lr_FPR, lr_error)
-    svm_FPR,svm_error = SVM.svm_fit(X)
-    print(svm_FPR,svm_error)
+    # svm_FPR,svm_error = SVM.svm_fit(X)
+    # print(svm_FPR,svm_error)
+    rF_FPR,rF_error = random_forest.rf_fit(X)
+    print(rF_FPR,rF_error)
 
     if visualize:
         db.display_data(sample_method,sample_portion,name, detail)
