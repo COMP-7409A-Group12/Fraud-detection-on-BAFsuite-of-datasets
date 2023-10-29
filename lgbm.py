@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import database as db
+from plot import savefig
 from sklearn.metrics import confusion_matrix
 from sklearn.base import clone
 
@@ -47,7 +48,7 @@ def plot_cross_val_f1(model, X, y):
     f1_scores = cross_val_score(model, X, y, scoring="f1", cv=cv)
 
     # 绘制F1分数
-    plt.figure(figsize=(12, 6))
+    fig=plt.figure(figsize=(12, 6))
     plt.plot(range(1, len(f1_scores) + 1), f1_scores, '-o')
     plt.title('Cross Validation - F1 Score')
     plt.xlabel('Fold')
@@ -55,23 +56,12 @@ def plot_cross_val_f1(model, X, y):
     plt.xticks(range(1, len(f1_scores) + 1))
     plt.ylim(0, 1)  # F1分数的范围为0到1
     plt.grid(True)
+    # 当绘制F1分数的条形图后:
+
+    # ... [rest of the plotting code for the F1 score]
+    savefig("cross_val_f1", "LGBM",fig)
     plt.show()
 
-
-
-def plot_cross_val_fpr(model, X, y, n_splits=5):
-    """
-    计算交叉验证的假正率并绘制条形图。
-    """
-    fpr_values = cross_val_fpr(model, X, y, n_splits=n_splits)
-
-    # 画条形图展示每次折叠的假正率
-    plt.bar(range(1, len(fpr_values) + 1), fpr_values)
-    plt.xlabel('Fold Number')
-    plt.ylabel('False Positive Rate (FPR)')
-    plt.title('Cross Validation - FPR')
-    plt.xticks(range(1, len(fpr_values) + 1))
-    plt.show()
 
 
 def cross_val_fpr(model, X, y, n_splits=5):
@@ -103,7 +93,7 @@ def plot_cross_val_fpr(model, X, y):
     fpr_values = cross_val_fpr(model, X, y)
 
     # 画条形图展示每次折叠的假正率
-    plt.figure(figsize=(12, 6))
+    fig=plt.figure(figsize=(12, 6))
     plt.bar(range(1, len(fpr_values) + 1), fpr_values)
     plt.xlabel('Fold Number')
     plt.ylabel('False Positive Rate (FPR)')
@@ -111,7 +101,13 @@ def plot_cross_val_fpr(model, X, y):
     plt.xticks(range(1, len(fpr_values) + 1))
     plt.ylim(0, 1)  # FPR的范围为0到1
     plt.grid(True)
+    # 当绘制fpr分数的条形图后:
+
+    # ... [rest of the plotting code for the F1 score]
+    savefig("cross_val_fpr", "LGBM",fig)
     plt.show()
+
+
 
 
 if __name__ == "__main__":

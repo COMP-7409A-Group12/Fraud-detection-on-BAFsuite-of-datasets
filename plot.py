@@ -1,6 +1,9 @@
+import os
+
 import matplotlib
 
-def savefig(graph_name:str, model_name, fig):
+
+def savefig(graph_name: str, model_name, fig):
     '''
     Input:
     graph_name: the name of the graph you want to save
@@ -12,6 +15,12 @@ def savefig(graph_name:str, model_name, fig):
     Therefore, in your_model.py, you could import this file
     and plot whatever you want.
     '''
-    path=f'./plots/{model_name}'
+    path = f'./plots/{model_name}'
+
+    # Create directory if it doesn't exist
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    fig.savefig(f'{path}/{graph_name}.png')
 
     return None
