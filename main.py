@@ -10,7 +10,7 @@ sample_method = None # Choose between None and 'random'
 sample_portion = 0.1 # Expecting a float number for example: 0.3
 name = 'base.csv'
 # Lenght attribute print data with full details or in brief.
-detail = 'short' # choose between 'short' and 'long'; 'short' by default
+detail = 'long' # choose between 'short' and 'long'; 'short' by default
 
 def main():
     '''
