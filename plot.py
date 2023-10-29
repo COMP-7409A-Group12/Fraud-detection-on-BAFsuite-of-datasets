@@ -52,7 +52,7 @@ def draw(x: list, y: list,model_name:str,parameter:str,evaluation_method:str) ->
 
     graph_name=f'{evaluation_method} of different {parameter}'
     # 显示图形
-    plt.show()
+    # plt.show()
     savefig(graph_name, model_name, fig)
 
 

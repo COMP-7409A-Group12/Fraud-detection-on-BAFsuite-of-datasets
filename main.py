@@ -1,38 +1,67 @@
 # import logistic_regression
 # import knn
 import database as db
-import SVM
-import logistic as lr
-import random_forest
-
-visualize = True # If you want to see all attribute in terminal, False by default
-sample_method = None # Choose between None and 'random'
-sample_portion = 0.1 # Expecting a float number for example: 0.3
-name = 'base.csv'
-# Lenght attribute print data with full details or in brief.
-detail = 'long' # choose between 'short' and 'long'; 'short' by default
 
 def main():
     '''
-    This is main logic of our project
-    TODO: implement database.py to correctly load data and display with pandas library
-    TODO: implement models namely, XXX.py and we import them on top
-    TODO: After we get results from each model(s) we need to draw them and display results, if any.
+    Main logic of our project
     '''
-    X = db.data_lanudry(sample_portion=sample_portion)
+    name = 'base.csv'
 
-    # lr_FPR, lr_error = lr.lr_fit(X)
-    # print(lr_FPR, lr_error)
-    # svm_FPR,svm_error = SVM.svm_fit(X)
-    # print(svm_FPR,svm_error)
-    rF_FPR,rF_error = random_forest.rf_fit(X)
-    print(rF_FPR,rF_error)
+    while 1:
+        print("**************************************\nData Preperation:\n**************************************")
+        sample_portion1 = float(input("sample portion for non-fraud class:"))
+        sample_portion2 = float(input("sample portion for fraud class:"))
 
-    if visualize:
-        db.display_data(sample_method,sample_portion,name, detail)
+        option = int(input("1.Visulize data\n2.algorithm\n3.quit\n"))
+        assert option in [1,2,3], "Invalid option"
 
+        if option == 1:
+            detail = input("Detail of data? (long/short):").lower()
+            print(detail)
+            assert detail in ['long','short'], "Invalid option"
+            db.display_data(sample_portion1, sample_portion2, name, detail)
+            continue
 
+        elif option == 3:
+            print("Program exit with code 0")
+            exit(0)
+        
+        print("**************************************\nOpertaion Selection:\n**************************************")
 
+        option = int(input("Which alogrithm you wish to use?\n1.Logistic Regression\n2.SVM\n3.Random Forest\n4.RNN\n5.Lightbgm\n"))
+        assert option in [1,2,3,4,5], "Invalid option"
+        X = db.data_lanudry(sample_portion1=sample_portion1,sample_portion2=sample_portion2,name=name)
 
+        portion = float(input("Portion for training data? Enter a float <1 :"))
+        cv = int(input("Define k for kfold: "))
+        
+        match option:
+            case 1:
+                import logistic as lr
+                lr_FPR, lr_error = lr.lr_fit(X, portion=portion, cv=cv)
+                # print(lr_FPR, lr_error)
+
+            case 2:
+                import SVM
+                svm_FPR,svm_error = SVM.svm_fit(X)
+                print(svm_FPR,svm_error)
+
+            case 3:
+                import random_forest
+                rF_FPR,rF_error = random_forest.rf_fit(X)
+                print(rF_FPR,rF_error)
+
+            case 4:
+                import RNN_implement as rnn
+                pass
+
+            case 5:
+                import lgbm
+                pass
+
+        option = input("Go back (any key) or Quit (q)? :").lower()
+        exit(0) if option == 'q' else ''
+        print("\n\n")
 main()
 

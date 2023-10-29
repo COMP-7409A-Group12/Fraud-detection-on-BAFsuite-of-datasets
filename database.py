@@ -23,13 +23,13 @@ def display_data(sample_method: str = None, sample_portion: str = None, name: st
             print(data[col].head(5))
 
 
-def data_lanudry(sample_method: str = None, sample_portion: float = None, name: str = 'base.csv'):
+def data_lanudry( sample_portion1: float = None,sample_portion2: float = None, name: str = 'base.csv'):
     '''
     Input:
     name: the name of csv you want to load
-    sample_method: how do you want to sample from non-fraund records
-    sample_portion: how much we need sample from non-fraud records
-    
+    sample_portion1: how much we need sample from non-fraud records
+    sample_portion2: how much we need sample from fraud records
+
     This method should load data from database directory then load assigned
     amount of non-fraud cases together with fraud cases (since fraud cases are tiny in comparison)
 
@@ -38,54 +38,43 @@ def data_lanudry(sample_method: str = None, sample_portion: float = None, name: 
     '''
 
     # load data:
-    data = pd.read_csv(f'./database/{name}')
+    try:
+        data = pd.read_csv(f'./database/{name}')
+    except FileNotFoundError:
+        print(f"file {name} is missing!")
+        exit(-1)
 
     # we should let pandas to load data as DataFrame object and process the way you want it
-    data = data_selection(data, sample_method, sample_portion)
+    data = data_selection(data, sample_portion1, sample_portion2)
 
     # return DF object
     return data
 
 
-def data_selection(data, sample_method: str = None, sample_portion: float = None):
+def data_selection(data, sample_portion1: float = None, sample_portion2: float = None):
     '''
     A method to select data, especially to select from a non-fraud class
     Since we've seen non-fraud records are way more than fraud records
 
     Input:
     name: the name of csv you want to load
-    sample_method: how do you want to sample from non-fraund records
-    sample_portion: how much we need sample from non-fraud records
+    
+    sample_portion1: how much we need sample from non-fraud records
+    sample_portion2: how much we need sample from fraud records
     '''
-    class_label = 0  # sample non-fraund cases by default
     seed = None  # the seed you want to replicate result, None by default
+    class_non_fraud = data[data['fraud_bool'] == 0]
+    class_fraud = data[data['fraud_bool'] == 1]
 
-    if sample_method == None:
-        if sample_portion == None:
-            return data
-        import math
-        class_non_fraud = data[data['fraud_bool'] == class_label]
-        class_non_fraud = class_non_fraud[:math.ceil(len(class_non_fraud) * sample_portion)]
-        data = pd.concat([class_non_fraud, data[data['fraud_bool'] == reverse_label(class_label)]])
-        print(
-            f"No sample method applys to {sample_portion * 100}% of {'non-fraud' if class_label == 0 else 'fraund'} cases")
+    
+    print(f"Randomly sample {sample_portion1 * 100}% of non-fraud cases")
+    print(f"Randomly sample {sample_portion2 * 100}% of fraud cases")
 
-    elif sample_method == 'random':
-        print(f"Randomly sample {sample_portion * 100}% of {'non-fraud' if class_label == 0 else 'fraund'} cases")
-        # data lanudry e.g. how do you want to sample data?
-        class_non_fraud = data[data['fraud_bool'] == class_label]
-        sample_non_fraud = class_non_fraud.sample(frac=sample_portion, random_state=seed)
-        data = pd.concat([sample_non_fraud, data[data['fraud_bool'] == reverse_label(class_label)]])
+    sample_non_fraud = class_non_fraud.sample(frac=sample_portion1, random_state=seed)
+    sample_fraud = class_fraud.sample(frac=sample_portion2, random_state=seed)
+    data = pd.concat([sample_non_fraud, sample_fraud])
     return data
 
-
-def reverse_label(class_label: int) -> int:
-    '''
-    Return opposite class label
-    '''
-    if class_label == 1:
-        return 0
-    return 1
 
 
 def one_hot(data, train, ohe):
