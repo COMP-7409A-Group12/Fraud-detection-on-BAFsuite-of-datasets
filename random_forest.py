@@ -7,9 +7,9 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import confusion_matrix
 
-def random_forest_train(X_train, y_train, X_test, y_test, n_estimators, random_state, criterion, max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_leaf_nodes=None, min_impurity_decrease=0.0, bootstrap=True, oob_score=False, n_jobs=None, verbose=0, warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None  ):
+def random_forest_train(X_train, y_train, X_test, y_test, n_estimators, random_state, criterion, max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_leaf_nodes=None, min_impurity_decrease=0.0, bootstrap=True, oob_score=False, n_jobs=None, verbose=0, warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None, cv=10):
     rF_model = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state, criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, bootstrap=bootstrap, oob_score=oob_score, n_jobs=n_jobs, verbose=verbose, warm_start=warm_start, class_weight=class_weight, ccp_alpha=ccp_alpha, max_samples=max_samples)
-    cross_validation(rF_model, X_train, y_train, 10, 'f1')
+    cross_validation(rF_model, X_train, y_train, cv, 'f1')
 
     rF_model.fit(X_train, y_train)
     y_pred = rF_model.predict(X_test)
@@ -19,8 +19,8 @@ def random_forest_train(X_train, y_train, X_test, y_test, n_estimators, random_s
     return FPR, error_rate
 
 
-def rf_fit(X: pd.DataFrame):
-    X_train, X_test = train_test_split(X, test_size=0.3, train_size=0.7)    # split data into train and test
+def rf_fit(X: pd.DataFrame, portion, cv):
+    X_train, X_test = train_test_split(X, test_size=1-portion, train_size=portion)    # split data into train and test
 
     y_train = X_train['fraud_bool']
     y_test = X_test['fraud_bool']
@@ -37,7 +37,7 @@ def rf_fit(X: pd.DataFrame):
     FPR, error = [], []
 
     for criterion in criterions:
-        fpr, lr_error = random_forest_train(X_train, y_train, X_test, y_test, n_estimators=100, random_state=100, criterion=criterion, max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_leaf_nodes=None, min_impurity_decrease=0.0, bootstrap=True, oob_score=False, n_jobs=None, verbose=0, warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None)
+        fpr, lr_error = random_forest_train(X_train, y_train, X_test, y_test, n_estimators=100, random_state=100, criterion=criterion, max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_leaf_nodes=None, min_impurity_decrease=0.0, bootstrap=True, oob_score=False, n_jobs=None, verbose=0, warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None, cv=cv)
 
         print(fpr, lr_error)
         FPR.append(fpr)
@@ -46,7 +46,15 @@ def rf_fit(X: pd.DataFrame):
     plot.draw(criterion_numlist, FPR, 'RF', 'criterion', 'FPR')
     plot.draw(criterion_numlist, error, 'RF', 'criterion', 'error')
 
+    the_best(FPR, error, criterions)
     return FPR, error
+
+def the_best(FPR, error, solvers):
+    '''
+    Print out hyperparameter that gives the best error and f1 score 
+    '''
+    print(f"The best solver for logistic regression is {solvers[error.index(max(error))]} based on f1 score:\navg:{sum(error)/len(error)}")
+    print(f"The best solver for logistic regression is {solvers[FPR.index(min(FPR))]} based on False Positive rate:\navg:{sum(FPR)/len(FPR)}")
 
 #------------------------------------------------------------
 

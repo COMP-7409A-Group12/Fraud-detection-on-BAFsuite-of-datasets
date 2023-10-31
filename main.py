@@ -10,6 +10,7 @@ def main():
 
     while 1:
         print("**************************************\nData Preperation:\n**************************************")
+        print("Please enter a float between 0 and 1 for sample portion:\n")
         sample_portion1 = float(input("sample portion for non-fraud class:"))
         sample_portion2 = float(input("sample portion for fraud class:"))
 
@@ -49,7 +50,7 @@ def main():
 
             case 3:
                 import random_forest
-                rF_FPR,rF_error = random_forest.rf_fit(X)
+                rF_FPR,rF_error = random_forest.rf_fit(X,portion=portion,cv=cv)
                 print(rF_FPR,rF_error)
 
             case 4:
