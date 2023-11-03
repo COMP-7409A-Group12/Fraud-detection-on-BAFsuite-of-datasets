@@ -33,6 +33,9 @@ def SVM_train(X_train, y_train, X_test, y_test, kernel: str,cv):
 #
 def svm_fit(X: pandas.DataFrame, portion, cv):
     # X_train, y_train = shuffle(X_train, y_train)
+
+
+
     X_train, X_test = train_test_split(X, test_size=1-portion, train_size=portion)
 
     y_train = X_train['fraud_bool']
