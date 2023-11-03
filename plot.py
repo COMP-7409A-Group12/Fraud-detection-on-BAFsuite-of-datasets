@@ -14,8 +14,12 @@ def savefig(graph_name: str, model_name, fig) -> None:
     Therefore, in your_model.py, you could import this file
     and plot whatever you want.
     '''
-
     path = f'./plots/{model_name}'
+
+    # Create directory if it doesn't exist
+    # if not os.path.exists(path):
+    #     os.makedirs(path)
+
     os.makedirs(path, exist_ok=True)
     filename = os.path.join(path, f"{model_name}_{graph_name}.png")
     fig.savefig(filename)
@@ -49,12 +53,11 @@ def draw(x: list, y: list, z:list,model_name:str,parameter:str,evaluation_method
 
     graph_name=f'{evaluation_method} of different {parameter}'
     # 显示图形
-    plt.show()
+    # plt.show()
     savefig(graph_name, model_name, fig)
 
 
 if __name__ == "__main__":
     x=[1,2,3,4,5]
     y=[9,8,7,6,5]
-    z=['a','b','c','d','e']
-    draw(x,y,z,'SVM','solver','accuracy')
+
