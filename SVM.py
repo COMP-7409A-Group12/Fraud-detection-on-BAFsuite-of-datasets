@@ -13,10 +13,10 @@ import database as db
 
 
 # train SVM  //rbf>linear>poly>sigmoid
-def SVM_train(X_train, y_train, X_test, y_test, kernel: str):
+def SVM_train(X_train, y_train, X_test, y_test, kernel: str,cv):
     svm = SVC(kernel=kernel)
     cross_list = []
-    cross_list = cross_validation(svm, X_train, y_train, 10, 'f1', cross_list)
+    cross_list,cross_average = cross_validation(svm, X_train, y_train, cv, 'f1', cross_list)
     cross_numlist = [i + 1 for i in range(len(cross_list[0]))]
     plot.draw(cross_numlist, cross_list[0], cross_numlist, 'SVM', f'{kernel}_fold', 'cross_result_f1')
 
@@ -27,13 +27,13 @@ def SVM_train(X_train, y_train, X_test, y_test, kernel: str):
     error_rate = (fp + fn) / (tn + fp + fn + tp)
     # return accuracy_score(y_test, y_pred), precision_score(y_test, y_pred), recall_score(y_test, y_pred), f1_score(
     #     y_test, y_pred)
-    return FPR, error_rate, cross_list
+    return FPR, error_rate, cross_list,cross_average
 
 
 #
-def svm_fit(X: pandas.DataFrame):
+def svm_fit(X: pandas.DataFrame, portion, cv):
     # X_train, y_train = shuffle(X_train, y_train)
-    X_train, X_test = train_test_split(X, test_size=0.3, train_size=0.7)
+    X_train, X_test = train_test_split(X, test_size=1-portion, train_size=portion)
 
     y_train = X_train['fraud_bool']
     y_test = X_test['fraud_bool']
@@ -46,30 +46,42 @@ def svm_fit(X: pandas.DataFrame):
     X_test = scaler.transform(X_test)
 
     kernels = ['linear', 'rbf', 'poly', 'sigmoid']
-    FPR, error = [], []
+    FPR, f1s = [], []
+
 
     for kernel in kernels:
-        fpr, svm_error, cross_result = SVM_train(X_train, y_train, X_test, y_test, kernel=kernel)
-        print(fpr, svm_error)
+        fpr, svm_error, cross_result,f1 = SVM_train(X_train, y_train, X_test, y_test, kernel=kernel,cv=cv)
+        #print(fpr, svm_error)
         FPR.append(fpr)
-        error.append(svm_error)
+        f1s.append(f1)
     kernel_numlist = [i + 1 for i in range(len(FPR))]
     plot.draw(kernel_numlist, FPR, kernels, 'SVM', 'kernel', 'FPR')
-    plot.draw(kernel_numlist, error, kernels, 'SVM', 'kernel', 'error')
+    plot.draw(kernel_numlist, f1s, kernels, 'SVM', 'kernel', 'f1s')
 
-    return FPR, error
+    the_best(FPR, f1s, kernels)
+
+    return FPR, f1s
     # accuracy, precision, recall, f1_score = SVM_train(X_train, y_train, X_test, y_test)
 
     # print(
     #     "accuracy:" + str(accuracy) + "\nprecision:" + str(precision) + "\nrecall:" + str(recall) + "\nf1_score:" + str(
     #         f1_score))
 
+def the_best(FPR, f1, kernels):
+    '''
+    Print out hyperparameter that gives the best fpr and f1 score
+    '''
+    print(
+        f"The best kernel for SVM is {kernels[f1.index(max(f1))]} based on f1 score:\navg:{sum(f1) / len(f1)}")
+    print(
+        f"The best kernel for SVM is {kernels[FPR.index(min(FPR))]} based on False Positive rate:\navg:{sum(FPR) / len(FPR)}")
 
 def cross_validation(model, x, y, cv, score_type: str, cross_result):
     scores = cross_val_score(model, x, y, cv=cv, scoring=score_type)
     cross_result.append(scores)
+
     # print(scores)
-    return cross_result
+    return cross_result,sum(scores) / len(scores)
 
 
 if __name__ == "__main__":

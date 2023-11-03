@@ -44,8 +44,8 @@ def main():
 
             case 2:
                 import SVM
-                svm_FPR,svm_error = SVM.svm_fit(X)
-                print(svm_FPR,svm_error)
+                svm_FPR,svm_error = SVM.svm_fit(X, portion=portion, cv=cv)
+                #print(svm_FPR,svm_error)
 
             case 3:
                 import random_forest

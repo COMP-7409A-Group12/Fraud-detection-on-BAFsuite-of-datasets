@@ -53,8 +53,9 @@ def draw(x: list, y: list, z:list,model_name:str,parameter:str,evaluation_method
 
     graph_name=f'{evaluation_method} of different {parameter}'
     # 显示图形
-    # plt.show()
+    plt.show()
     savefig(graph_name, model_name, fig)
+
 
 
 if __name__ == "__main__":
