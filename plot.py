@@ -22,7 +22,7 @@ def savefig(graph_name: str, model_name, fig) -> None:
     print("Graph saved as", filename)
 
 
-def draw(x: list, y: list,model_name:str,parameter:str,evaluation_method:str) -> None:
+def draw(x: list, y: list, z:list,model_name:str,parameter:str,evaluation_method:str) -> None:
     """
     Input:
     x:select of the parameter value,which is represented in a number
@@ -45,6 +45,7 @@ def draw(x: list, y: list,model_name:str,parameter:str,evaluation_method:str) ->
     # 设置横坐标刻度和标签
     xticks = x
     ax.set_xticks(xticks)
+    ax.set_xticklabels(z)
 
     graph_name=f'{evaluation_method} of different {parameter}'
     # 显示图形
@@ -55,4 +56,5 @@ def draw(x: list, y: list,model_name:str,parameter:str,evaluation_method:str) ->
 if __name__ == "__main__":
     x=[1,2,3,4,5]
     y=[9,8,7,6,5]
-    draw(x,y,'SVM','solver','accuracy')
+    z=['a','b','c','d','e']
+    draw(x,y,z,'SVM','solver','accuracy')
