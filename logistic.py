@@ -14,7 +14,10 @@ def logistic_regression_train(X_train, y_train, X_test, y_test,solver):
 
     lr = LogisticRegression(solver=solver,max_iter=999)
     #########################################################
-    cross_validation(lr, X_train, y_train,10,'f1')
+    cross_list = []
+    cross_list = cross_validation(lr, X_train, y_train,10,'f1',cross_list)
+    cross_numlist = [i + 1 for i in range(len(cross_list[0]))]
+    plot.draw(cross_numlist, cross_list[0], cross_numlist, 'LR', f'{solver}_fold', 'cross_result_f1')
     #########################################################
 
 
@@ -23,7 +26,7 @@ def logistic_regression_train(X_train, y_train, X_test, y_test,solver):
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     FPR = fp / (tn + fp)
     error_rate = (fp + fn) / (tn + fp + fn + tp)
-    return FPR, error_rate
+    return FPR, error_rate, cross_list
 
 
 
@@ -44,21 +47,28 @@ def lr_fit(X:pandas.DataFrame):
     FPR, error = [], []
 
     for solver in solvers:
-        fpr, lr_error = logistic_regression_train(X_train, y_train, X_test, y_test, solver=solver)
+        fpr, lr_error, cross_result= logistic_regression_train(X_train, y_train, X_test, y_test, solver=solver)
+
 
         print(fpr, lr_error)
         FPR.append(fpr)
         error.append(lr_error)
     solver_numlist = [i + 1 for i in range(len(FPR))]
-    plot.draw(solver_numlist, FPR, 'LR', 'solver', 'FPR')
-    plot.draw(solver_numlist, error, 'LR', 'solver', 'error')
+    plot.draw(solver_numlist, FPR, solvers,'LR', 'solver', 'FPR')
+    plot.draw(solver_numlist, error, solvers,'LR', 'solver', 'error')
 
     return FPR, error
 
 #########################################################
-def cross_validation(model, x, y,cv,score_type:str):
+def cross_validation(model, x, y,cv,score_type:str,cross_result):
     scores = cross_val_score(model, x, y, cv=cv, scoring=score_type)
-    print(scores)
+    cross_result.append(scores)
+    #print(scores)
+    #cross_num = [i + 1 for i in range(cv)]
+    # print(cross_num)
+    # print(cross_result)
+    # plot.draw(cross_num, cross_result, cross_num, 'LR', 'solver', 'cross_result')
+    return cross_result
 #########################################################
 if __name__ == "__main__":
     '''For testing purpose only'''

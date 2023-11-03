@@ -11,25 +11,28 @@ from sklearn.utils import shuffle
 
 import database as db
 
+
 # train SVM  //rbf>linear>poly>sigmoid
-def SVM_train(X_train, y_train, X_test, y_test,kernel:str):
+def SVM_train(X_train, y_train, X_test, y_test, kernel: str):
     svm = SVC(kernel=kernel)
-    cross_validation(svm, X_train, y_train, 10, 'f1')
+    cross_list = []
+    cross_list = cross_validation(svm, X_train, y_train, 10, 'f1', cross_list)
+    cross_numlist = [i + 1 for i in range(len(cross_list[0]))]
+    plot.draw(cross_numlist, cross_list[0], cross_numlist, 'SVM', f'{kernel}_fold', 'cross_result_f1')
 
     svm.fit(X_train, y_train)
     y_pred = svm.predict(X_test)
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     FPR = fp / (tn + fp)
-    error_rate = (fp+fn) / (tn + fp + fn + tp)
+    error_rate = (fp + fn) / (tn + fp + fn + tp)
     # return accuracy_score(y_test, y_pred), precision_score(y_test, y_pred), recall_score(y_test, y_pred), f1_score(
     #     y_test, y_pred)
-    return FPR,error_rate
+    return FPR, error_rate, cross_list
 
 
 #
-def svm_fit(X:pandas.DataFrame):
-
-    #X_train, y_train = shuffle(X_train, y_train)
+def svm_fit(X: pandas.DataFrame):
+    # X_train, y_train = shuffle(X_train, y_train)
     X_train, X_test = train_test_split(X, test_size=0.3, train_size=0.7)
 
     y_train = X_train['fraud_bool']
@@ -43,30 +46,30 @@ def svm_fit(X:pandas.DataFrame):
     X_test = scaler.transform(X_test)
 
     kernels = ['linear', 'rbf', 'poly', 'sigmoid']
-    FPR ,error= [],[]
-
+    FPR, error = [], []
 
     for kernel in kernels:
-        fpr,svm_error = SVM_train(X_train, y_train, X_test, y_test, kernel=kernel)
-        print(fpr,svm_error)
+        fpr, svm_error, cross_result = SVM_train(X_train, y_train, X_test, y_test, kernel=kernel)
+        print(fpr, svm_error)
         FPR.append(fpr)
         error.append(svm_error)
     kernel_numlist = [i + 1 for i in range(len(FPR))]
-    plot.draw(kernel_numlist, FPR, 'SVM', 'kernel', 'FPR')
-    plot.draw(kernel_numlist, error, 'SVM', 'kernel', 'error')
+    plot.draw(kernel_numlist, FPR, kernels, 'SVM', 'kernel', 'FPR')
+    plot.draw(kernel_numlist, error, kernels, 'SVM', 'kernel', 'error')
 
-    return FPR,error
-    #accuracy, precision, recall, f1_score = SVM_train(X_train, y_train, X_test, y_test)
+    return FPR, error
+    # accuracy, precision, recall, f1_score = SVM_train(X_train, y_train, X_test, y_test)
 
     # print(
     #     "accuracy:" + str(accuracy) + "\nprecision:" + str(precision) + "\nrecall:" + str(recall) + "\nf1_score:" + str(
     #         f1_score))
 
-def cross_validation(model, x, y,cv,score_type:str):
+
+def cross_validation(model, x, y, cv, score_type: str, cross_result):
     scores = cross_val_score(model, x, y, cv=cv, scoring=score_type)
-    print(scores)
-
-
+    cross_result.append(scores)
+    # print(scores)
+    return cross_result
 
 
 if __name__ == "__main__":
@@ -84,8 +87,4 @@ if __name__ == "__main__":
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
-    print(SVM_train(X_train, y_train, X_test, y_test,'linear'))
-
-
-
-
+    print(SVM_train(X_train, y_train, X_test, y_test, 'linear'))
