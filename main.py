@@ -54,7 +54,8 @@ def main():
 
             case 4:
                 import RNN_implement as rnn
-                pass
+                rnn_FPR,rnn_error = rnn.rnn_fit(X, portion=portion, cv=cv)
+                #print(svm_FPR,svm_error)
 
             case 5:
                 import lgbm
