@@ -59,7 +59,9 @@ def main():
 
             case 5:
                 import lgbm
-                pass
+                lgbm_FPR,lgbm_ERR=lgbm.lgbm_fit(X, portion=portion, cv=cv)
+                print("lgbm_FPR of each cv:",lgbm_FPR)
+                print("lgbm_ERR of each cv:", lgbm_ERR)
 
         option = input("Go back (any key) or Quit (q)? :").lower()
         exit(0) if option == 'q' else ''
