@@ -9,14 +9,17 @@ from sklearn.metrics import confusion_matrix
 
 def random_forest_train(X_train, y_train, X_test, y_test, n_estimators, random_state, criterion, max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_leaf_nodes=None, min_impurity_decrease=0.0, bootstrap=True, oob_score=False, n_jobs=None, verbose=0, warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None, cv=10):
     rF_model = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state, criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, bootstrap=bootstrap, oob_score=oob_score, n_jobs=n_jobs, verbose=verbose, warm_start=warm_start, class_weight=class_weight, ccp_alpha=ccp_alpha, max_samples=max_samples)
-    cross_validation(rF_model, X_train, y_train, cv, 'f1')
-
+    cross_list = []
+    cross_list, cross_average = cross_validation(rF_model, X_train, y_train, cv, 'f1', cross_list)
+    cross_numlist = [i + 1 for i in range(len(cross_list[0]))]
+    plot.draw(cross_numlist, cross_list[0], cross_numlist, 'RF', f'{criterion}_fold', 'cross_result_f1')
+    
     rF_model.fit(X_train, y_train)
     y_pred = rF_model.predict(X_test)
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     FPR = fp / (tn + fp)
     error_rate = (fp + fn) / (tn + fp + fn + tp)
-    return FPR, error_rate
+    return FPR, error_rate, cross_list, cross_average
 
 
 def rf_fit(X: pd.DataFrame, portion, cv):
@@ -34,33 +37,35 @@ def rf_fit(X: pd.DataFrame, portion, cv):
 
     # The function to measure the quality of a split.
     criterions = ['gini', 'entropy', 'log_loss']
-    FPR, error = [], []
+    FPR, f1s = [], []
 
     for criterion in criterions:
-        fpr, lr_error = random_forest_train(X_train, y_train, X_test, y_test, n_estimators=100, random_state=100, criterion=criterion, max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_leaf_nodes=None, min_impurity_decrease=0.0, bootstrap=True, oob_score=False, n_jobs=None, verbose=0, warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None, cv=cv)
+        fpr, lr_error, cross_val_score, f1 = random_forest_train(X_train, y_train, X_test, y_test, n_estimators=100, random_state=100, criterion=criterion, max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_leaf_nodes=None, min_impurity_decrease=0.0, bootstrap=True, oob_score=False, n_jobs=None, verbose=0, warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None, cv=cv)
 
-        print(fpr, lr_error)
+        print(fpr, lr_error, cross_val_score, f1)
         FPR.append(fpr)
-        error.append(lr_error)
+        f1s.append(lr_error)
     criterion_numlist = [i + 1 for i in range(len(FPR))]
-    plot.draw(criterion_numlist, FPR, 'RF', 'criterion', 'FPR')
-    plot.draw(criterion_numlist, error, 'RF', 'criterion', 'error')
+    plot.draw(criterion_numlist, FPR, criterions, 'RF', 'criterion', 'FPR')
+    plot.draw(criterion_numlist, f1s, criterions, 'RF', 'criterion', 'f1s')
 
-    the_best(FPR, error, criterions)
-    return FPR, error
+    the_best(FPR, f1s, criterions)
+    return FPR, f1s
 
-def the_best(FPR, error, solvers):
+def the_best(FPR, f1, criterions):
     '''
     Print out hyperparameter that gives the best error and f1 score 
     '''
-    print(f"The best solver for logistic regression is {solvers[error.index(max(error))]} based on f1 score:\navg:{sum(error)/len(error)}")
-    print(f"The best solver for logistic regression is {solvers[FPR.index(min(FPR))]} based on False Positive rate:\navg:{sum(FPR)/len(FPR)}")
+    print(f"The best solver for random forest is {criterions[f1.index(max(f1))]} based on f1 score:\navg:{sum(f1)/len(f1)}")
+    print(f"The best solver for random forest is {criterions[FPR.index(min(FPR))]} based on False Positive rate:\navg:{sum(FPR)/len(FPR)}")
 
 #------------------------------------------------------------
 
-def cross_validation(model, x, y, cv, score_type: str):
+def cross_validation(model, x, y, cv, score_type: str, cross_result):
     scores = cross_val_score(model, x, y, cv=cv, scoring=score_type)
-    print(f'Cross validation scores: {scores}')
+    cross_result.append(scores)
+    # print(f'Cross validation scores: {scores}')
+    return cross_result,sum(scores) / len(scores)
 
 #------------------------------------------------------------
 
