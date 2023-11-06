@@ -14,13 +14,13 @@ from plot import savefig
 from sklearn.metrics import confusion_matrix
 from sklearn.base import clone
 
-def LGBM_train(X_train, y_train, X_test, y_test):
+def LGBM_train(X_train, y_train, cv):
     model = LGBMClassifier()
     # 现在使用编码后的数据训练模型
     model.fit(X_train, y_train)
     parameters = {'num_leaves': [10, 15, 31], 'n_estimators': [10, 20, 30], 'learning_rate': [0.05, 0.1, 0.2]}
     model = LGBMClassifier()
-    grid_search = GridSearchCV(model, parameters, scoring='f1', cv=5)
+    grid_search = GridSearchCV(model, parameters, scoring='f1', cv=cv)
     grid_search.fit(X_train, y_train)
     best_params=grid_search.best_params_
     # 打印最佳参数和最佳分数
@@ -40,12 +40,12 @@ def evaluate_model(model, X_test, y_test):
     print("F1 Score on Test Data:", score)
 
 
-def plot_cross_val_f1(model, X, y):
+def plot_cross_val_f1(model, X, y,cvnum):
     # 使用KFold作为交叉验证策略
-    cv = KFold(n_splits=5, shuffle=True, random_state=42)
+    cvobject = KFold(n_splits=cvnum, shuffle=True, random_state=42)
 
     # 使用f1作为评分，并执行交叉验证
-    f1_scores = cross_val_score(model, X, y, scoring="f1", cv=cv)
+    f1_scores = cross_val_score(model, X, y, scoring="f1", cv=cvnum)
 
     # 绘制F1分数
     fig=plt.figure(figsize=(12, 6))
@@ -64,14 +64,15 @@ def plot_cross_val_f1(model, X, y):
 
 
 
-def cross_val_fpr(model, X, y, n_splits=5):
+def cross_val_fpr(model, X, y, cvnum):
     """
     计算交叉验证的假正率。
     """
-    cv = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+    cvobject = KFold(n_splits=cvnum, shuffle=True, random_state=42)
     fpr_values = []
+    error_values=[]
 
-    for train_index, test_index in cv.split(X, y):
+    for train_index, test_index in cvobject.split(X, y):
         X_train_fold, X_test_fold = X.iloc[train_index], X.iloc[test_index]
         y_train_fold, y_test_fold = y.iloc[train_index], y.iloc[test_index]
 
@@ -81,16 +82,19 @@ def cross_val_fpr(model, X, y, n_splits=5):
 
         tn, fp, fn, tp = confusion_matrix(y_test_fold, y_pred_fold).ravel()
         fpr = fp / (fp + tn)
+        error_rate = (fp + fn) / (tn + fp + fn + tp)
         fpr_values.append(fpr)
+        error_values.append(error_rate)
 
-    return fpr_values
+    return fpr_values,error_values
 
 
-def plot_cross_val_fpr(model, X, y):
+def plot_cross_val_fpr(model, X, y,cvnum):
     """
     计算交叉验证的假正率并绘制条形图。
     """
-    fpr_values = cross_val_fpr(model, X, y)
+    fpr_values ,error_values= cross_val_fpr(model, X, y,cvnum)
+
 
     # 画条形图展示每次折叠的假正率
     fig=plt.figure(figsize=(12, 6))
@@ -106,27 +110,16 @@ def plot_cross_val_fpr(model, X, y):
     # ... [rest of the plotting code for the F1 score]
     savefig("cross_val_fpr", "LGBM",fig)
     plt.show()
+    return fpr_values,error_values
 
-
-
-
-if __name__ == "__main__":
-    '''For testing purpose only'''
-    X = db.data_lanudry(sample_portion=0.1)
-
-    ### 你可以用一小簇数据来快速debug
-    # X.sample(frac=0.001)
-    #####################################
-
-    X_train, X_test = train_test_split(X, test_size=0.3, train_size=0.7)
+def lgbm_fit(X: pd.DataFrame, portion, cv):
+    X_train, X_test = train_test_split(X,train_size=portion)
 
     y_train = X_train['fraud_bool']
     y_test = X_test['fraud_bool']
     ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
     X_train = db.one_hot(X_train.drop(['fraud_bool'], axis=1), True, ohe)
     X_test = db.one_hot(X_test.drop(['fraud_bool'], axis=1), False, ohe)
-
-
     num_train_samples = len(X_test)
     print(f"训练集包含 {num_train_samples} 个数据样本。")
     # 对训练集中的fraud_bool列的值计数
@@ -138,8 +131,49 @@ if __name__ == "__main__":
     print("\n测试集中的fraud_bool计数：")
     print(test_fraud_counts)
 
-    model=LGBM_train(X_train, y_train, X_test, y_test)
+    model=LGBM_train(X_train, y_train,cv)
     evaluate_model(model, X_test, y_test)
-    plot_cross_val_f1(model, X_test, y_test)
-    plot_cross_val_fpr(model, X_test, y_test)
+    lgbm_FPR,lgbm_ERR=plot_cross_val_fpr(model, X_test, y_test,cv)
+    plot_cross_val_f1(model, X_test, y_test,cv)
+
+    return lgbm_FPR,lgbm_ERR
+
+
+
+
+
+if __name__ == "__main__":
+    '''For testing purpose only'''
+    X = db.data_lanudry(sample_portion1=0.1,sample_portion2=0.1,name='base.csv')
+    lgbm_fit(X, 0.7, 5)
+
+    ### 你可以用一小簇数据来快速debug
+    # X.sample(frac=0.001)
+    #####################################
+
+    # X_train, X_test = train_test_split(X, test_size=0.3, train_size=0.7)
+    # cv=5
+    #
+    # y_train = X_train['fraud_bool']
+    # y_test = X_test['fraud_bool']
+    # ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+    # X_train = db.one_hot(X_train.drop(['fraud_bool'], axis=1), True, ohe)
+    # X_test = db.one_hot(X_test.drop(['fraud_bool'], axis=1), False, ohe)
+    #
+    #
+    # num_train_samples = len(X_test)
+    # print(f"训练集包含 {num_train_samples} 个数据样本。")
+    # # 对训练集中的fraud_bool列的值计数
+    # train_fraud_counts = y_train.value_counts()
+    # print("训练集中的fraud_bool计数：")
+    # print(train_fraud_counts)
+    # # 对测试集中的fraud_bool列的值计数
+    # test_fraud_counts = y_test.value_counts()
+    # print("\n测试集中的fraud_bool计数：")
+    # print(test_fraud_counts)
+    #
+    # model=LGBM_train(X_train, y_train,cv)
+    # evaluate_model(model, X_test, y_test)
+    # plot_cross_val_f1(model, X_test, y_test,cv)
+    # plot_cross_val_fpr(model, X_test, y_test,cv)
 

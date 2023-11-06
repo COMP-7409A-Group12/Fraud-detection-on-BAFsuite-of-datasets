@@ -45,8 +45,8 @@ def main():
 
             case 2:
                 import SVM
-                svm_FPR,svm_error = SVM.svm_fit(X)
-                print(svm_FPR,svm_error)
+                svm_FPR,svm_error = SVM.svm_fit(X, portion=portion, cv=cv)
+                #print(svm_FPR,svm_error)
 
             case 3:
                 import random_forest
@@ -55,11 +55,14 @@ def main():
 
             case 4:
                 import RNN_implement as rnn
-                pass
+                rnn_FPR,rnn_error = rnn.rnn_fit(X, portion=portion, cv=cv)
+                #print(svm_FPR,svm_error)
 
             case 5:
                 import lgbm
-                pass
+                lgbm_FPR,lgbm_ERR=lgbm.lgbm_fit(X, portion=portion, cv=cv)
+                print("lgbm_FPR of each cv:",lgbm_FPR)
+                print("lgbm_ERR of each cv:", lgbm_ERR)
 
         option = input("Go back (any key) or Quit (q)? :").lower()
         exit(0) if option == 'q' else ''
