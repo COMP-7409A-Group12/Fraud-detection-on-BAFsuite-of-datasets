@@ -1,4 +1,4 @@
 database/*.csv
 __pycache__
 .idea
-draft
+draft.py
