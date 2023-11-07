@@ -1,27 +1,47 @@
-from sklearn import datasets
-from sklearn.model_selection import train_test_split
 from sklearn import svm
-from sklearn.model_selection import GridSearchCV
+from sklearn.inspection import DecisionBoundaryDisplay
 
-# 加载数据集
-iris = datasets.load_iris()
-X = iris.data
-y = iris.target
 
-# 划分训练集和测试集
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+def plot_training_data_with_decision_boundary(kernel):
+    # Train the SVC
+    clf = svm.SVC(kernel=kernel, gamma=2).fit(X, y)
 
-# 定义参数网格
-param_grid = {'C': [0.1, 1, 10, 100], 'gamma': [1, 0.1, 0.01, 0.001], 'kernel': ['rbf', 'poly', 'sigmoid']}
+    # Settings for plotting
+    _, ax = plt.subplots(figsize=(4, 3))
+    x_min, x_max, y_min, y_max = -3, 3, -3, 3
+    ax.set(xlim=(x_min, x_max), ylim=(y_min, y_max))
 
-# 创建一个SVM分类器实例
-svc = svm.SVC()
+    # Plot decision boundary and margins
+    common_params = {"estimator": clf, "X": X, "ax": ax}
+    DecisionBoundaryDisplay.from_estimator(
+        **common_params,
+        response_method="predict",
+        plot_method="pcolormesh",
+        alpha=0.3,
+    )
+    DecisionBoundaryDisplay.from_estimator(
+        **common_params,
+        response_method="decision_function",
+        plot_method="contour",
+        levels=[-1, 0, 1],
+        colors=["k", "k", "k"],
+        linestyles=["--", "-", "--"],
+    )
 
-# 创建GridSearchCV实例
-grid = GridSearchCV(svc, param_grid, refit=True, verbose=2)
+    # Plot bigger circles around samples that serve as support vectors
+    ax.scatter(
+        clf.support_vectors_[:, 0],
+        clf.support_vectors_[:, 1],
+        s=250,
+        facecolors="none",
+        edgecolors="k",
+    )
+    # Plot samples by color and add legend
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=150, edgecolors="k")
+    ax.legend(*scatter.legend_elements(), loc="upper right", title="Classes")
+    ax.set_title(f" Decision boundaries of {kernel} kernel in SVC")
 
-# 使用训练数据拟合GridSearchCV
-grid.fit(X_train, y_train)
+    _ = plt.show()
 
-# 打印最优的参数组合
-print(grid.best_params_)
+
+plot_training_data_with_decision_boundary("linear")
