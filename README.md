@@ -10,7 +10,7 @@
 >Link: https://docs.google.com/document/d/1REfFCZOKR-V5SowUwqwtFaTH1IJR-R0uF8IKbXkIH9I/edit
 
 * Presentation & Graph
->Link: https://docs.google.com/presentation/d/10YbVM00zRd0to9S1j0bS98gCVSLAkXWH3qMJA_ylZ3s/edit?usp=drive_web&ouid=103035752099491406767
+>Link: https://www.canva.com/design/DAFyz5_0qdk/NcAQmnKF1eG6T7UizaBWAQ/view
 
 ## How to install packages used for this project?
 >pip install --upgrade-strategy only-if-needed -r requirements.txt
